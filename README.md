@@ -7,7 +7,7 @@ on:
 
 jobs:
   increment_version:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest12345
 
     steps:
       - name: Checkout code
