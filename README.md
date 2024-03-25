@@ -1,4 +1,4 @@
-# name: Version Incrementation
+name: Deploy Application
 
 on:
   push:
@@ -6,48 +6,42 @@ on:
       - main
 
 jobs:
-  increment_version:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
 
-      - name: Get Latest Tag
-        id: latest_tag
+      - name: Generate Git Tag
+        id: generate_tag
         run: |
-          git fetch --tags
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$latest_tag" ]; then
-            # If no tag found, use branch name
-            latest_tag=$(echo "v1.0.0_${GITHUB_REF#refs/heads/}")
+          # Find the latest tag if available
+          LATEST_TAG=$(git describe --tags --abbrev=0 || echo "")
+          
+          if [ -z "$LATEST_TAG" ]; then
+            # If no tags found, start with initial version and branch name
+            NEW_TAG="V1.0.1_main"
+          else
+            # Extract the version number and branch name from the latest tag
+            VERSION_BRANCH=$(echo "$LATEST_TAG" | cut -d'_' -f1)
+            VERSION=$(echo "$VERSION_BRANCH" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+            BRANCH_NAME=$(echo "$LATEST_TAG" | cut -d'_' -f2)
+            
+            # Increment the version number
+            NEW_VERSION=$(echo "$VERSION" | awk -F'.' '{print $1 "." $2 "." $3 + 1}')
+            
+            # Construct the new tag
+            NEW_TAG="V${NEW_VERSION}_${BRANCH_NAME}"
           fi
-          echo "::set-output name=latest_tag::$latest_tag"
+          
+          echo "Generated new tag: $NEW_TAG"
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
 
-      - name: Increment Version
-        id: increment_version
+      - name: Push Git Tag
         run: |
-          # Extract major, minor, and patch numbers from the latest tag
-          major=$(echo "${{ steps.latest_tag.outputs.latest_tag }}" | cut -d'.' -f1 | sed 's/v//')
-          minor=$(echo "${{ steps.latest_tag.outputs.latest_tag }}" | cut -d'.' -f2)
-          patch=$(echo "${{ steps.latest_tag.outputs.latest_tag }}" | cut -d'.' -f3 | cut -d'_' -f1)
-          # Increment the appropriate part (e.g., minor) as needed
-          minor=$((minor + 1))
-          # Form the new version string
-          new_version="v${major}.${minor}.${patch}_QA"
-          echo "::set-output name=new_version::$new_version"
-
-      - name: Commit Changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -am "Increment version to ${{ steps.increment_version.outputs.new_version }}"
-          git push
-
-
-      - name: Commit Changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -am "Increment version to ${{ steps.increment_version.outputs.new_version }}"
-          git push
+          git config user.name "Nithish@NetXD"
+          git config user.email "nithish.t@netxd.com"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
