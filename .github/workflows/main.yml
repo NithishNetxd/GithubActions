@@ -18,17 +18,18 @@ jobs:
         run: |
           git fetch --tags
           latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0_QA")
-          echo "latest_tag=${latest_tag}" >> $GITHUB_ENV
+          echo "::set-output name=latest_tag::$latest_tag"
 
       - name: Increment Version
         id: increment_version
         run: |
-          major=$(echo "${latest_tag}" | cut -d'.' -f1 | sed 's/v//')
-          minor=$(echo "${latest_tag}" | cut -d'.' -f2)
-          patch=$(echo "${latest_tag}" | cut -d'.' -f3 | cut -d'_' -f1)
+          default_tag="${{ steps.latest_tag.outputs.latest_tag }}"
+          major=$(echo "$default_tag" | cut -d'.' -f1 | sed 's/v//')
+          minor=$(echo "$default_tag" | cut -d'.' -f2)
+          patch=$(echo "$default_tag" | cut -d'.' -f3 | cut -d'_' -f1)
           minor=$((minor + 1))
           new_version="v${major}.${minor}.${patch}_QA"
-          echo "new_version=${new_version}" >> $GITHUB_ENV
+          echo "::set-output name=new_version::$new_version"
 
       - name: Set up Git
         run: |
@@ -37,7 +38,7 @@ jobs:
 
       - name: Create and Push Tag
         run: |
-          git tag "${new_version}"
-          git push origin "${new_version}" --force
+          git tag "${{ steps.increment_version.outputs.new_version }}"
+          git push origin "${{ steps.increment_version.outputs.new_version }}" --force
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
