@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - main  # Adjust branch name as needed12345
+      - main  # Adjust branch name as needed123456
 
 jobs:
   increment_version:
