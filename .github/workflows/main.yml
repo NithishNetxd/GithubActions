@@ -33,9 +33,11 @@ jobs:
           new_version="v${major}.${minor}.${patch}_QA"
           echo "::set-output name=new_version::$new_version"
 
-      - name: Create Tag
+      - name: Create Tag and Push
         run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
           git tag "${{ steps.increment_version.outputs.new_version }}"
-          git push origin "${{ steps.increment_version.outputs.new_version }}" --tags
+          git push origin "${{ steps.increment_version.outputs.new_version }}"
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
