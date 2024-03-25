@@ -10,51 +10,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
-
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
-          git config user.name "Abisheck2002"
-          git config user.email "abisheck.g@netxd.com"
+          git config user.name "Nithish@NetXD"
+          git config user.email "nithish.t@netxd.com"
+
       - name: Get the latest tag
         id: get-latest-tag
-        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
-
-      - name: Get previous tag old
         run: |
-          git fetch --prune --unshallow
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1)
-          echo "Previous tag: $PREV_TAG"
+          git fetch --tags
+          latest_tag=$(git describe --tags --abbrev=0)
+          echo "Latest tag: $latest_tag"
+          echo "::set-output name=tag::$latest_tag"
+
       - name: Get previous tag
-        id: get_previous_tag
+        id: get-previous-tag
         run: |
           previous_tag=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1))
-          echo "Previous version in new : $previous_tag"
-          
-      
+          echo "Previous tag: $previous_tag"
+          echo "::set-output name=previous_tag::$previous_tag"
+
       - name: Bump version
-        id: bump_version
+        id: bump-version
         run: |
           # Extract the previous tag
-          previous_tag="${{ steps.get_previous_tag.outputs.previous_tag }}"
+          previous_tag="${{ steps.get-previous-tag.outputs.previous_tag }}"
+          echo "Previous tag: $previous_tag"
           
           # Extract the version number
           version="${previous_tag##*/v}"
-          echo "Version $version"
+          echo "Version: $version"
           
           # Increment the version (assuming it follows semantic versioning X.Y.Z)
           IFS='.' read -r major minor patch <<< "$version"
           patch=$((patch + 1))
           new_version="${major}.${minor}.${patch}"
           
-          echo "New Version = $new_version"
+          echo "New Version: $new_version"
+          echo "::set-output name=new_version::$new_version"
+
       - name: Tag and push changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          new_tag="v${{ steps.bump_version.outputs.new_version }}"
+          new_tag="v${{ steps.bump-version.outputs.new_version }}_QA"
           git tag "$new_tag"
           git push origin "$new_tag"
