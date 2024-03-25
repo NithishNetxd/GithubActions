@@ -1,6 +1,6 @@
 # name: Version Incrementation
 
-on:
+on:fdfd
   push:
     branches:
       - main
