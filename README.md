@@ -43,5 +43,5 @@ jobs:
         run: |
           git config user.name "Nithish@NetXD"
           git config user.email "nithish.t@netxd.com"
-          git tag $NEW_TAG
+          git tag $NEW_TAGsdfsdfsdf
           git push origin $NEW_TAG
