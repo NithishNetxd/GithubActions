@@ -1,7 +1,6 @@
 # name: Version Incrementation
 
 on:
-
   push:
     branches:
       - main  # Adjust branch name as needed
