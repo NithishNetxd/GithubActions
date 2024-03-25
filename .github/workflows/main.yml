@@ -17,7 +17,7 @@ jobs:
       - name: Generate Git Tag
         id: generate_tag
         run: |
-          VERSION_PREFIX="V"
+          VERSION_PREFIX="v"
           VERSION_MAJOR_MINOR="1.0"
           
           # Find the latest tag if available
