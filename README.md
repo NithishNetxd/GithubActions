@@ -1,13 +1,13 @@
-# name: Version Incrementation
+name: Version Incrementation
 
 on:
   push:
     branches:
-      - main  # Adjust branch name as needed123456
+      - main
 
 jobs:
   increment_version:
-    runs-on: ubuntu-latest12345
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -17,7 +17,11 @@ jobs:
         id: latest_tag
         run: |
           git fetch --tags
-          latest_tag=$(git describe --tags --abbrev=0 || echo "v0.0.0_QA")
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$latest_tag" ]; then
+            # If no tag found, use branch name
+            latest_tag=$(echo "v1.0.0_${GITHUB_REF#refs/heads/}")
+          fi
           echo "::set-output name=latest_tag::$latest_tag"
 
       - name: Increment Version
@@ -32,6 +36,14 @@ jobs:
           # Form the new version string
           new_version="v${major}.${minor}.${patch}_QA"
           echo "::set-output name=new_version::$new_version"
+
+      - name: Commit Changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Increment version to ${{ steps.increment_version.outputs.new_version }}"
+          git push
+
 
       - name: Commit Changes
         run: |
