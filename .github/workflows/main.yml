@@ -22,7 +22,7 @@ jobs:
           
           if [ -z "$LATEST_TAG" ]; then
             # If no tags found, start with initial version and branch name
-            NEW_TAG="V1.0.0_main"
+            NEW_TAG="V1.0.0_$GITHUB_REF_SLUG"
           else
             # Extract the version number and branch name from the latest tag
             VERSION_BRANCH=$(echo "$LATEST_TAG" | cut -d'_' -f1)
@@ -33,7 +33,7 @@ jobs:
             NEW_VERSION=$(echo "$VERSION" | awk -F'.' '{print $1 "." $2 "." $3 + 1}')
             
             # Construct the new tag
-            NEW_TAG="V${NEW_VERSION}_${BRANCH_NAME}"
+            NEW_TAG="V${NEW_VERSION}_$GITHUB_REF_SLUG"
           fi
           
           echo "Generated new tag: $NEW_TAG"
