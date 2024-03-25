@@ -35,7 +35,7 @@ jobs:
 
       - name: Commit Changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "nithish.t@netxd.com"
+          git config --local user.name "Nithish@NetXD"
           git commit -am "Increment version to ${{ steps.increment_version.outputs.new_version }}"
           git push
